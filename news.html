@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>最新消息 — Salmon4neko Studio 鮭貓工作室</title>
+    <meta name="description" content="鮭貓工作室最新消息，包含技術分享、工作室公告與活動資訊。" />
+    <meta property="og:title" content="最新消息 — Salmon4neko Studio 鮭貓工作室" />
+    <meta property="og:description" content="鮭貓工作室最新消息，包含技術分享、工作室公告與活動資訊。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://salmon4neko.com/news" />
+    <link rel="icon" type="image/png"
+        href="https://img.uwub.tw/Salmon4neko%20Studio_%E6%AD%A3%E6%96%B9%E5%BD%A2%E5%9C%96%E6%A8%99.png" />
+
+    <!-- Tocas UI 5.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.js"></script>
+
+    <!-- 字體：Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css?v=20260721c" />
+
+    <style>
+        /* =============================================
+           最新消息頁面專屬樣式
+           ============================================= */
+
+        .s4n-news-hero {
+            position: relative;
+            padding: 7rem 0 5rem;
+            margin-top: 64px;
+            background: linear-gradient(135deg, var(--s4n-bg) 0%, var(--s4n-bg-alt) 100%);
+            border-bottom: 1px solid var(--s4n-border);
+            overflow: hidden;
+        }
+
+        .s4n-news-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 55% 60% at 90% 10%, rgba(255, 99, 16, 0.06) 0%, transparent 65%),
+                radial-gradient(ellipse 35% 45% at 5% 90%, rgba(255, 99, 16, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .s4n-news-hero-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 分類篩選 */
+        .s4n-news-filters {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+        }
+
+        .s4n-filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border-radius: 999px;
+            border: 1.5px solid var(--s4n-border-md);
+            background: var(--s4n-bg);
+            color: var(--s4n-text-2);
+            cursor: pointer;
+            transition: background var(--s4n-transition), color var(--s4n-transition),
+                border-color var(--s4n-transition);
+        }
+
+        .s4n-filter-btn:hover,
+        .s4n-filter-btn.is-active {
+            background: var(--s4n-salmon);
+            color: #fff;
+            border-color: var(--s4n-salmon);
+        }
+
+        /* 文章卡片格線 */
+        .s4n-news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+        }
+
+        /* 文章卡片 */
+        .s4n-news-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--s4n-white);
+            border: 1px solid var(--s4n-border);
+            border-radius: var(--s4n-radius-lg);
+            box-shadow: var(--s4n-shadow-sm);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color var(--s4n-transition), transform var(--s4n-transition),
+                box-shadow var(--s4n-transition) !important;
+        }
+
+        .s4n-news-card:hover {
+            border-color: rgba(255, 99, 16, 0.3);
+            transform: translateY(-5px) !important;
+            box-shadow: var(--s4n-shadow-lg);
+        }
+
+        .s4n-news-card-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            display: block;
+            background: var(--s4n-bg-alt);
+        }
+
+        .s4n-news-card-thumb-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--s4n-salmon-pale), var(--s4n-bg-alt));
+            font-size: 3rem;
+        }
+
+        .s4n-news-card-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .s4n-news-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+
+        .s4n-news-cat-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+        }
+
+        .s4n-cat-tech {
+            background: #eff6ff;
+            color: #3b82f6;
+            border: 1px solid #bfdbfe;
+        }
+
+        .s4n-cat-notice {
+            background: var(--s4n-salmon-pale);
+            color: var(--s4n-salmon);
+            border: 1px solid rgba(255, 99, 16, 0.25);
+        }
+
+        .s4n-cat-event {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .s4n-news-card-date {
+            font-size: 0.78rem;
+            color: var(--s4n-text-light);
+        }
+
+        .s4n-news-card-title {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: var(--s4n-text);
+            line-height: 1.4;
+            margin-bottom: 0.65rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .s4n-news-card:hover .s4n-news-card-title {
+            color: var(--s4n-salmon);
+        }
+
+        .s4n-news-card-excerpt {
+            font-size: 0.875rem;
+            color: var(--s4n-text-2);
+            line-height: 1.7;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+            margin-bottom: 1.25rem;
+        }
+
+        .s4n-news-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid var(--s4n-border);
+        }
+
+        .s4n-news-card-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--s4n-text-2);
+        }
+
+        .s4n-news-card-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--s4n-salmon-pale);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .s4n-news-read-more {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--s4n-salmon);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: gap var(--s4n-transition);
+        }
+
+        .s4n-news-card:hover .s4n-news-read-more {
+            gap: 0.5rem;
+        }
+
+        /* 空狀態 */
+        .s4n-news-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--s4n-text-light);
+        }
+
+        /* 響應式 */
+        @media (max-width: 960px) {
+            .s4n-news-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .s4n-news-hero {
+                padding: 5.5rem 0 3.5rem;
+            }
+
+            .s4n-news-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ======== 導航列 ======== -->
+    <header class="s4n-header" id="page-header">
+        <div class="s4n-nav-inner">
+            <a class="s4n-logo" href="index.html" id="logo-link">
+                <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                    alt="Salmon4neko Studio 鮭貓工作室" class="s4n-logo-img" />
+            </a>
+            <nav class="s4n-nav-links" id="main-nav" aria-label="主要導覽">
+                <a href="index.html#about" class="s4n-nav-link" id="nav-about">關於我們</a>
+                <a href="services.html" class="s4n-nav-link" id="nav-services">服務項目</a>
+                <a href="index.html#partners" class="s4n-nav-link" id="nav-partners">夥伴組織</a>
+                <a href="news.html" class="s4n-nav-link is-active" id="nav-news">最新消息</a>
+                <a href="contact.html" class="s4n-nav-link" id="nav-contact">聯絡我們</a>
+            </nav>
+            <a href="contact.html" class="s4n-cta-btn" id="cta-button">立即聯絡</a>
+            <button class="s4n-menu-toggle" id="menu-toggle" aria-label="開啟選單" aria-expanded="false"
+                aria-controls="mobile-menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <!-- 手機選單 -->
+        <div class="s4n-mobile-menu" id="mobile-menu" aria-hidden="true">
+            <a href="index.html#about" class="s4n-mobile-link" id="mobile-nav-about">關於我們</a>
+            <a href="services.html" class="s4n-mobile-link" id="mobile-nav-services">服務項目</a>
+            <a href="index.html#partners" class="s4n-mobile-link" id="mobile-nav-partners">夥伴組織</a>
+            <a href="news.html" class="s4n-mobile-link" id="mobile-nav-news">最新消息</a>
+            <a href="contact.html" class="s4n-mobile-link" id="mobile-nav-contact">聯絡我們</a>
+            <a href="contact.html" class="s4n-mobile-cta" id="mobile-cta">立即聯絡</a>
+        </div>
+    </header>
+
+    <!-- ======== Hero 區塊 ======== -->
+    <section class="s4n-news-hero" id="news-hero">
+        <div class="s4n-container">
+            <div class="s4n-news-hero-inner">
+                <div class="s4n-section-label" id="news-hero-label">NEWS &amp; BLOG</div>
+                <h1 class="s4n-page-hero-title" id="news-hero-title">最新消息</h1>
+                <p class="s4n-page-hero-desc" id="news-hero-desc">
+                    技術分享、工作室公告與活動資訊，掌握鮭貓工作室的最新動態
+                </p>
+
+                <!-- 分類篩選 -->
+                <div class="s4n-news-filters" id="news-filters" role="group" aria-label="文章分類篩選">
+                    <button class="s4n-filter-btn is-active" data-filter="all" id="filter-all">全部</button>
+                    <button class="s4n-filter-btn" data-filter="tech" id="filter-tech">🛠️ 技術分享</button>
+                    <button class="s4n-filter-btn" data-filter="notice" id="filter-notice">📢 工作室公告</button>
+                    <button class="s4n-filter-btn" data-filter="event" id="filter-event">🎉 活動資訊</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 文章列表 ======== -->
+    <section class="s4n-section" id="news-list">
+        <div class="s4n-container">
+            <div class="s4n-news-grid" id="news-grid">
+
+                <!-- 文章卡片 001 -->
+                <a href="news/001-cloudflare-r2-picgo.html" class="s4n-news-card" data-category="tech"
+                    id="news-card-001" aria-label="使用 Cloudflare R2 + PicGo 建立免費圖床">
+                    <img src="https://img.uwub.tw/cf1.png" alt="Cloudflare R2 R2物件儲存頁面截圖" class="s4n-news-card-thumb"
+                        loading="lazy" />
+                    <div class="s4n-news-card-body">
+                        <div class="s4n-news-card-meta">
+                            <span class="s4n-news-cat-tag s4n-cat-tech">技術分享</span>
+                            <span class="s4n-news-card-date">2026-07-21</span>
+                        </div>
+                        <h2 class="s4n-news-card-title">使用 Cloudflare R2 + PicGo 建立免費圖床</h2>
+                        <p class="s4n-news-card-excerpt">
+                            介紹如何透過 Cloudflare R2 物件儲存搭配 PicGo GUI 工具，建立穩定可靠的自有圖床解決方案。
+                            完全免費、全球 CDN 加速，且完全相容 S3 API，適合需要可靠圖片儲存的專案使用。
+                        </p>
+                        <div class="s4n-news-card-footer">
+                            <div class="s4n-news-card-author">
+                                <img src="https://img.uwub.tw/bafkreihvciizougvtv62mdo3qgdpns3is7l3yuhtyetq4fu3cuzlg3fs4a.jpg" alt="鮭鮭" class="s4n-news-card-avatar" />
+                                <span>鮭鮭</span>
+                            </div>
+                            <span class="s4n-news-read-more" aria-hidden="true">閱讀全文 →</span>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 頁尾 ======== -->
+    <footer class="s4n-footer" id="page-footer">
+        <div class="s4n-container">
+            <div class="s4n-footer-inner">
+                <div class="s4n-footer-brand" id="footer-brand">
+                    <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                        alt="Salmon4neko Studio 鮭貓工作室" class="s4n-footer-logo" />
+                </div>
+                <nav class="s4n-footer-nav" id="footer-nav" aria-label="頁尾導覽">
+                    <a href="index.html" id="footer-home">首頁</a>
+                    <a href="services.html" id="footer-services">服務</a>
+                    <a href="index.html#about" id="footer-about">關於我們</a>
+                    <a href="index.html#partners" id="footer-partners">夥伴組織</a>
+                    <a href="news.html" id="footer-news">最新消息</a>
+                    <a href="contact.html" id="footer-contact">聯絡我們</a>
+                </nav>
+                <div class="s4n-footer-copy" id="footer-copy">
+                    © 2026 Salmon4neko Studio 鮭貓工作室 · <a href="https://sake-corp.com/" target="_blank" rel="noopener"
+                        style="color:inherit; text-decoration:underline; text-underline-offset:3px; opacity:0.75; transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">石桂商社</a>旗下組織
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var s = document.createElement('script');
+            s.src = 'script.js?v=' + Date.now();
+            document.body.appendChild(s);
+        })();
+    </script>
+
+    <script>
+        // 分類篩選
+        (function () {
+            var filterBtns = document.querySelectorAll('.s4n-filter-btn');
+            var cards = document.querySelectorAll('.s4n-news-card');
+
+            filterBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var filter = btn.dataset.filter;
+
+                    // 更新按鈕狀態
+                    filterBtns.forEach(function (b) { b.classList.remove('is-active'); });
+                    btn.classList.add('is-active');
+
+                    // 篩選卡片
+                    cards.forEach(function (card) {
+                        var cat = card.dataset.category;
+                        if (filter === 'all' || cat === filter) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        })();
+    </script>
+
+</body>
+
+</html>

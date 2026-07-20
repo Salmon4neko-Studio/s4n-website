@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>聯絡我們 — Salmon4neko Studio 鮭貓工作室</title>
+    <meta name="description" content="透過 Line 官方客服或商務信箱與鮭貓工作室聯繫，歡迎商品開發、活動企劃或品牌合作洽詢。" />
+    <meta property="og:title" content="聯絡我們 — Salmon4neko Studio 鮭貓工作室" />
+    <meta property="og:description" content="透過 Line 官方客服或商務信箱與鮭貓工作室聯繫。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://salmon4neko.com/contact" />
+    <link rel="icon" type="image/png"
+        href="https://img.uwub.tw/Salmon4neko%20Studio_%E6%AD%A3%E6%96%B9%E5%BD%A2%E5%9C%96%E6%A8%99.png" />
+
+    <!-- Tocas UI 5.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.js"></script>
+
+    <!-- 字體：Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css?v=20260721c" />
+
+
+    <style>
+        /* =============================================
+           聯絡頁面專屬樣式
+           ============================================= */
+
+        /* Hero 背景漸層 */
+        .s4n-contact-page-hero {
+            position: relative;
+            padding: 7rem 0 5rem;
+            margin-top: 64px;
+            background: linear-gradient(135deg, var(--s4n-salmon) 0%, var(--s4n-salmon-lt) 60%, #ff9f6b 100%);
+            overflow: hidden;
+        }
+
+        .s4n-contact-page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 70% at 80% 20%, rgba(255,255,255,0.12) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 50% at 10% 90%, rgba(0,0,0,0.08) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .s4n-contact-page-hero-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .s4n-contact-page-hero-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 0.75rem;
+        }
+
+        .s4n-contact-page-hero-title {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .s4n-contact-page-hero-desc {
+            font-size: 1.0625rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.8;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* 聯絡卡片區塊 */
+        .s4n-contact-page-section {
+            padding: 5rem 0;
+            background: var(--s4n-bg);
+        }
+
+        .s4n-contact-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.75rem;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .s4n-contact-channel-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 2rem 1.75rem;
+            background: var(--s4n-white);
+            border: 1px solid var(--s4n-border);
+            border-radius: var(--s4n-radius-lg);
+            box-shadow: var(--s4n-shadow-sm);
+            transition: border-color var(--s4n-transition), transform var(--s4n-transition), box-shadow var(--s4n-transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .s4n-contact-channel-card:hover {
+            border-color: rgba(255,99,16,0.3);
+            transform: translateY(-5px);
+            box-shadow: var(--s4n-shadow-lg);
+        }
+
+        .s4n-contact-channel-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--s4n-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .s4n-channel-line .s4n-contact-channel-icon-wrap {
+            background: #06c755;
+            box-shadow: 0 4px 16px rgba(6,199,85,0.3);
+        }
+
+        .s4n-channel-email .s4n-contact-channel-icon-wrap {
+            background: var(--s4n-salmon-pale);
+            box-shadow: 0 4px 16px rgba(255,99,16,0.2);
+        }
+
+        .s4n-contact-channel-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--s4n-text-light);
+            margin-bottom: 0.2rem;
+        }
+
+        .s4n-contact-channel-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--s4n-text);
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+
+        .s4n-contact-channel-value {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--s4n-text-2);
+            word-break: break-all;
+        }
+
+        .s4n-contact-channel-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: auto;
+            padding-top: 0.5rem;
+        }
+
+        .s4n-channel-line .s4n-contact-channel-cta {
+            color: #06c755;
+        }
+
+        .s4n-channel-email .s4n-contact-channel-cta {
+            color: var(--s4n-salmon);
+        }
+
+        .s4n-contact-channel-card:hover .s4n-contact-channel-cta {
+            text-decoration: underline;
+        }
+
+        /* 「非連結」email 卡片 */
+        .s4n-contact-channel-static {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 2rem 1.75rem;
+            background: var(--s4n-white);
+            border: 1px solid var(--s4n-border);
+            border-radius: var(--s4n-radius-lg);
+            box-shadow: var(--s4n-shadow-sm);
+            color: inherit;
+        }
+
+        /* 複製按鈕 */
+        .s4n-copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            padding: 0.45rem 1rem;
+            border-radius: var(--s4n-radius-sm);
+            border: 1.5px solid var(--s4n-border-md);
+            background: var(--s4n-bg-alt);
+            color: var(--s4n-text-2);
+            cursor: pointer;
+            transition: background var(--s4n-transition), color var(--s4n-transition), border-color var(--s4n-transition);
+            margin-top: 0.25rem;
+        }
+        .s4n-copy-btn:hover {
+            background: var(--s4n-salmon-pale);
+            color: var(--s4n-salmon);
+            border-color: rgba(255,99,16,0.3);
+        }
+        .s4n-copy-btn.is-copied {
+            background: #e8f9ef;
+            color: #1da557;
+            border-color: #a5dfc0;
+        }
+
+        /* 響應式 */
+        @media (max-width: 640px) {
+            .s4n-contact-cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .s4n-contact-page-hero {
+                padding: 5.5rem 0 3.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ======== 導航列 ======== -->
+    <header class="s4n-header" id="page-header">
+        <div class="s4n-nav-inner">
+            <a class="s4n-logo" href="index.html" id="logo-link">
+                <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                    alt="Salmon4neko Studio 鮭貓工作室" class="s4n-logo-img" />
+            </a>
+            <nav class="s4n-nav-links" id="main-nav" aria-label="主要導覽">
+                <a href="index.html#about" class="s4n-nav-link" id="nav-about">關於我們</a>
+                <a href="services.html" class="s4n-nav-link" id="nav-services">服務項目</a>
+                <a href="index.html#partners" class="s4n-nav-link" id="nav-partners">夥伴組織</a>
+                <a href="news.html" class="s4n-nav-link" id="nav-news">最新消息</a>
+                <a href="contact.html" class="s4n-nav-link is-active" id="nav-contact">聯絡我們</a>
+            </nav>
+            <a href="services.html" class="s4n-cta-btn" id="cta-button">了解服務</a>
+            <button class="s4n-menu-toggle" id="menu-toggle" aria-label="開啟選單" aria-expanded="false"
+                aria-controls="mobile-menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <!-- 手機選單 -->
+        <div class="s4n-mobile-menu" id="mobile-menu" aria-hidden="true">
+            <a href="index.html#about" class="s4n-mobile-link" id="mobile-nav-about">關於我們</a>
+            <a href="services.html" class="s4n-mobile-link" id="mobile-nav-services">服務項目</a>
+            <a href="index.html#partners" class="s4n-mobile-link" id="mobile-nav-partners">夥伴組織</a>
+            <a href="news.html" class="s4n-mobile-link" id="mobile-nav-news">最新消息</a>
+            <a href="contact.html" class="s4n-mobile-link" id="mobile-nav-contact">聯絡我們</a>
+            <a href="services.html" class="s4n-mobile-cta" id="mobile-cta">了解服務</a>
+        </div>
+    </header>
+
+    <!-- ======== Hero 區塊 ======== -->
+    <section class="s4n-contact-page-hero" id="contact-hero">
+        <div class="s4n-container">
+            <div class="s4n-contact-page-hero-inner">
+                <div class="s4n-contact-page-hero-label">CONTACT</div>
+                <h1 class="s4n-contact-page-hero-title">聯絡我們</h1>
+                <p class="s4n-contact-page-hero-desc">
+                    有任何合作提案、商品詢問或商業洽談，<br>
+                    歡迎透過以下管道與我們聯繫。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 聯絡管道 ======== -->
+    <section class="s4n-contact-page-section" id="contact-channels">
+        <div class="s4n-container">
+            <div style="text-align:center; margin-bottom:3rem;">
+                <div class="s4n-section-label">GET IN TOUCH</div>
+                <h2 class="s4n-section-title">選擇聯絡方式</h2>
+                <p class="s4n-section-lead" style="margin: 0 auto;">
+                    我們透過 Line 客服與商務信箱提供即時回應，請選擇您方便的方式聯繫我們。
+                </p>
+            </div>
+
+            <div class="s4n-contact-cards-grid">
+
+                <!-- Line 官方客服 -->
+                <a href="https://page.line.me/@uwub" target="_blank" rel="noopener"
+                    class="s4n-contact-channel-card s4n-channel-line" id="contact-line-card">
+                    <div class="s4n-contact-channel-icon-wrap" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 4C11.163 4 4 10.268 4 18c0 5.297 3.317 9.93 8.333 12.573-.115.42-.742 2.706-.852 3.1-.133.48.176.473.369.344.154-.102 6.14-4.065 8.623-5.71.5.07 1.01.106 1.527.106C28.837 28.413 36 22.145 36 14.413 36 8.117 28.837 4 20 4z" fill="#fff"/>
+                            <path d="M16.5 16.5h-1.75v5.25h1.75V16.5zM22 16.5h-1.75v3.02l-2.32-3.02H16.5v5.25h1.75V18.73l2.32 3.02H22V16.5zM13.5 20h-2v-3.5H9.75V21.75H13.5V20zm13.75 1.75h-3.75V16.5h1.75v3.5h2v1.75z" fill="#06c755"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="s4n-contact-channel-label">官方 Line 客服</div>
+                        <div class="s4n-contact-channel-name">Line 官方帳號</div>
+                        <div class="s4n-contact-channel-value">@uwub</div>
+                    </div>
+                    <div class="s4n-contact-channel-cta">
+                        開啟 Line 對話 →
+                    </div>
+                </a>
+
+                <!-- 商務信箱 -->
+                <div class="s4n-contact-channel-card s4n-channel-email" id="contact-email-card"
+                    style="cursor:default;">
+                    <div class="s4n-contact-channel-icon-wrap" aria-hidden="true">✉️</div>
+                    <div>
+                        <div class="s4n-contact-channel-label">商務信箱</div>
+                        <div class="s4n-contact-channel-name">Business Email</div>
+                        <div class="s4n-contact-channel-value">business@salmon4neko.com</div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:auto; padding-top:0.5rem;">
+                        <a href="mailto:business@salmon4neko.com"
+                            class="s4n-btn s4n-btn-primary"
+                            style="padding:0.45rem 1rem; font-size:0.8125rem;"
+                            id="contact-email-mailto">寄送郵件</a>
+                        <button class="s4n-copy-btn" id="copy-email-btn" aria-label="複製信箱">
+                            📋 複製
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 回到首頁 CTA ======== -->
+    <section class="s4n-section s4n-section-alt" id="contact-back">
+        <div class="s4n-container">
+            <div class="s4n-cta-center">
+                <h2 class="s4n-section-title">想了解更多服務？</h2>
+                <p class="s4n-section-lead" style="margin: 0 auto 2.5rem;">
+                    瀏覽我們的完整服務項目，找到最適合您的合作方案。
+                </p>
+                <div class="s4n-cta-actions">
+                    <a href="services.html" class="s4n-btn s4n-btn-primary" id="contact-to-services-btn">查看服務項目</a>
+                    <a href="index.html" class="s4n-btn s4n-btn-ghost" id="contact-to-home-btn">回到首頁</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 頁尾 ======== -->
+    <footer class="s4n-footer" id="page-footer">
+        <div class="s4n-container">
+            <div class="s4n-footer-inner">
+                <div class="s4n-footer-brand" id="footer-brand">
+                    <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                        alt="Salmon4neko Studio 鮭貓工作室" class="s4n-footer-logo" />
+                </div>
+                <nav class="s4n-footer-nav" id="footer-nav" aria-label="頁尾導覽">
+                    <a href="index.html" id="footer-home">首頁</a>
+                    <a href="services.html" id="footer-services">服務</a>
+                    <a href="index.html#about" id="footer-about">關於我們</a>
+                    <a href="index.html#partners" id="footer-partners">夥伴組織</a>
+                    <a href="news.html" id="footer-news">最新消息</a>
+                    <a href="contact.html" id="footer-contact">聯絡我們</a>
+                </nav>
+                <div class="s4n-footer-copy" id="footer-copy">
+                    © 2026 Salmon4neko Studio 鮭貓工作室 · <a href="https://sake-corp.com/" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline; text-underline-offset:3px; opacity:0.75; transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">石桂商社</a>旗下組織
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var s = document.createElement('script');
+            s.src = 'script.js?v=' + Date.now();
+            document.body.appendChild(s);
+        })();
+    </script>
+
+    <script>
+        // 複製信箱功能
+        var copyBtn = document.getElementById('copy-email-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                navigator.clipboard.writeText('business@salmon4neko.com').then(function () {
+                    copyBtn.textContent = '✓ 已複製';
+                    copyBtn.classList.add('is-copied');
+                    setTimeout(function () {
+                        copyBtn.textContent = '📋 複製';
+                        copyBtn.classList.remove('is-copied');
+                    }, 2000);
+                });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

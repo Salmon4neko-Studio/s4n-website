@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>使用 Cloudflare R2 + PicGo 建立免費圖床 — Salmon4neko Studio</title>
+    <meta name="description" content="介紹如何透過 Cloudflare R2 物件儲存搭配 PicGo GUI 工具，建立穩定可靠的自有圖床解決方案，完全免費且支援全球 CDN 加速。" />
+    <meta property="og:title" content="使用 Cloudflare R2 + PicGo 建立免費圖床 — Salmon4neko Studio" />
+    <meta property="og:description" content="介紹如何透過 Cloudflare R2 物件儲存搭配 PicGo GUI 工具，建立穩定可靠的自有圖床解決方案。" />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png" />
+    <meta property="og:url" content="https://salmon4neko.com/news/001-cloudflare-r2-picgo" />
+    <meta property="article:published_time" content="2026-07-21" />
+    <link rel="icon" type="image/png"
+        href="https://img.uwub.tw/Salmon4neko%20Studio_%E6%AD%A3%E6%96%B9%E5%BD%A2%E5%9C%96%E6%A8%99.png" />
+
+    <!-- Tocas UI 5.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/5.0.2/tocas.min.js"></script>
+
+    <!-- 字體：Noto Sans TC + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="../style.css?v=20260721c" />
+
+    <style>
+        /* =============================================
+           文章頁面專屬樣式
+           ============================================= */
+
+        /* 文章 Hero */
+        .s4n-article-hero {
+            margin-top: 64px;
+            padding: 4.5rem 0 3.5rem;
+            background: var(--s4n-bg);
+            border-bottom: 1px solid var(--s4n-border);
+        }
+
+        .s4n-article-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8125rem;
+            color: var(--s4n-text-light);
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+        }
+
+        .s4n-article-breadcrumb a {
+            color: var(--s4n-text-2);
+            transition: color var(--s4n-transition);
+        }
+
+        .s4n-article-breadcrumb a:hover {
+            color: var(--s4n-salmon);
+        }
+
+        .s4n-article-breadcrumb-sep {
+            opacity: 0.4;
+        }
+
+        .s4n-article-hero-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .s4n-article-cat-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #3b82f6;
+            border: 1px solid #bfdbfe;
+        }
+
+        .s4n-article-date {
+            font-size: 0.875rem;
+            color: var(--s4n-text-light);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .s4n-article-hero-title {
+            font-size: clamp(1.875rem, 4vw, 2.75rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            color: var(--s4n-text);
+            margin-bottom: 1.5rem;
+        }
+
+        .s4n-article-hero-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .s4n-article-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--s4n-salmon-pale);
+            border: 2px solid rgba(255, 99, 16, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .s4n-article-author-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--s4n-text);
+        }
+
+        .s4n-article-author-role {
+            font-size: 0.8rem;
+            color: var(--s4n-text-light);
+        }
+
+        /* 封面圖 */
+        .s4n-article-cover {
+            width: 100%;
+            max-height: 480px;
+            object-fit: cover;
+            border-radius: var(--s4n-radius-lg);
+            display: block;
+            margin: 0 auto 3rem;
+            box-shadow: var(--s4n-shadow-lg);
+        }
+
+        /* 文章主體佈局 */
+        .s4n-article-layout {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        /* 文章內容 */
+        .s4n-article-body {
+            min-width: 0;
+        }
+
+        .s4n-article-content {
+            font-size: 1rem;
+            line-height: 1.9;
+            color: var(--s4n-text);
+        }
+
+        .s4n-article-content h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--s4n-text);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--s4n-border);
+        }
+
+        .s4n-article-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .s4n-article-content h4 {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: var(--s4n-text);
+            margin: 2rem 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .s4n-article-content h4::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1em;
+            background: var(--s4n-salmon);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .s4n-article-content p {
+            margin: 0 0 1.25rem;
+            color: var(--s4n-text);
+        }
+
+        .s4n-article-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .s4n-article-content a {
+            color: var(--s4n-salmon);
+            text-decoration: underline;
+            text-decoration-color: rgba(255, 99, 16, 0.35);
+            text-underline-offset: 3px;
+            font-weight: 500;
+            transition: color var(--s4n-transition), text-decoration-color var(--s4n-transition);
+        }
+
+        .s4n-article-content a:hover {
+            color: var(--s4n-salmon-dk);
+            text-decoration-color: var(--s4n-salmon-dk);
+        }
+
+        .s4n-article-content strong {
+            font-weight: 700;
+            color: var(--s4n-text);
+        }
+
+        .s4n-article-content s {
+            color: var(--s4n-text-light);
+            text-decoration: line-through;
+        }
+
+        /* 文章圖片 */
+        .s4n-article-img-wrap {
+            margin: 1.75rem 0;
+            text-align: center;
+        }
+
+        .s4n-article-img-wrap img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--s4n-radius);
+            border: 1px solid var(--s4n-border);
+            box-shadow: var(--s4n-shadow);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 引言塊 */
+        .s4n-article-pullquote {
+            margin: 2rem 0;
+            padding: 2rem 2.5rem;
+            background: linear-gradient(135deg, var(--s4n-salmon-pale) 0%, rgba(255, 243, 237, 0.5) 100%);
+            border-radius: var(--s4n-radius-lg);
+            border: 1px solid rgba(255, 99, 16, 0.15);
+            text-align: center;
+        }
+
+        .s4n-article-pullquote blockquote {
+            margin: 0;
+        }
+
+        .s4n-article-pullquote p {
+            font-size: 1.1875rem;
+            font-weight: 700;
+            color: var(--s4n-salmon-dk);
+            line-height: 1.6;
+            margin-bottom: 0.75rem !important;
+            font-style: italic;
+        }
+
+        .s4n-article-pullquote cite {
+            font-size: 0.875rem;
+            color: var(--s4n-text-2);
+            font-style: normal;
+        }
+
+        .s4n-article-pullquote cite::before {
+            content: '— ';
+        }
+
+        /* 側欄 */
+        .s4n-article-sidebar {
+            position: sticky;
+            top: calc(64px + 1.5rem);
+        }
+
+        .s4n-sidebar-card {
+            background: var(--s4n-white);
+            border: 1px solid var(--s4n-border);
+            border-radius: var(--s4n-radius);
+            padding: 1.25rem;
+            box-shadow: var(--s4n-shadow-sm);
+            margin-bottom: 1.25rem;
+        }
+
+        .s4n-sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--s4n-text-light);
+            margin-bottom: 1rem;
+        }
+
+        .s4n-toc-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .s4n-toc-list a {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--s4n-text-2);
+            padding: 0.3rem 0.5rem;
+            border-radius: var(--s4n-radius-sm);
+            transition: color var(--s4n-transition), background var(--s4n-transition);
+            text-decoration: none;
+        }
+
+        .s4n-toc-list a:hover {
+            color: var(--s4n-salmon);
+            background: var(--s4n-salmon-pale);
+        }
+
+        .s4n-toc-list .toc-sub {
+            padding-left: 1rem;
+            font-size: 0.8125rem;
+            color: var(--s4n-text-light);
+        }
+
+        /* 文章底部 */
+        .s4n-article-footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--s4n-border);
+        }
+
+        .s4n-article-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 2rem;
+        }
+
+        .s4n-article-tag {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            background: var(--s4n-bg-alt);
+            border: 1px solid var(--s4n-border);
+            color: var(--s4n-text-2);
+        }
+
+        .s4n-article-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* 響應式 */
+        @media (max-width: 900px) {
+            .s4n-article-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .s4n-article-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .s4n-article-hero {
+                padding: 3.5rem 0 2.5rem;
+            }
+
+            .s4n-article-content h2 {
+                font-size: 1.25rem;
+            }
+
+            .s4n-article-pullquote {
+                padding: 1.5rem;
+            }
+
+            .s4n-article-pullquote p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ======== 導航列 ======== -->
+    <header class="s4n-header" id="page-header">
+        <div class="s4n-nav-inner">
+            <a class="s4n-logo" href="../index.html" id="logo-link">
+                <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                    alt="Salmon4neko Studio 鮭貓工作室" class="s4n-logo-img" />
+            </a>
+            <nav class="s4n-nav-links" id="main-nav" aria-label="主要導覽">
+                <a href="../index.html#about" class="s4n-nav-link" id="nav-about">關於我們</a>
+                <a href="../services.html" class="s4n-nav-link" id="nav-services">服務項目</a>
+                <a href="../index.html#partners" class="s4n-nav-link" id="nav-partners">夥伴組織</a>
+                <a href="../news.html" class="s4n-nav-link is-active" id="nav-news">最新消息</a>
+                <a href="../contact.html" class="s4n-nav-link" id="nav-contact">聯絡我們</a>
+            </nav>
+            <a href="../contact.html" class="s4n-cta-btn" id="cta-button">立即聯絡</a>
+            <button class="s4n-menu-toggle" id="menu-toggle" aria-label="開啟選單" aria-expanded="false"
+                aria-controls="mobile-menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <!-- 手機選單 -->
+        <div class="s4n-mobile-menu" id="mobile-menu" aria-hidden="true">
+            <a href="../index.html#about" class="s4n-mobile-link" id="mobile-nav-about">關於我們</a>
+            <a href="../services.html" class="s4n-mobile-link" id="mobile-nav-services">服務項目</a>
+            <a href="../index.html#partners" class="s4n-mobile-link" id="mobile-nav-partners">夥伴組織</a>
+            <a href="../news.html" class="s4n-mobile-link" id="mobile-nav-news">最新消息</a>
+            <a href="../contact.html" class="s4n-mobile-link" id="mobile-nav-contact">聯絡我們</a>
+            <a href="../contact.html" class="s4n-mobile-cta" id="mobile-cta">立即聯絡</a>
+        </div>
+    </header>
+
+    <!-- ======== 文章 Hero ======== -->
+    <section class="s4n-article-hero" id="article-hero">
+        <div class="s4n-container">
+
+            <!-- 麵包屑 -->
+            <nav class="s4n-article-breadcrumb" aria-label="麵包屑導覽" id="breadcrumb">
+                <a href="../index.html" id="bc-home">首頁</a>
+                <span class="s4n-article-breadcrumb-sep" aria-hidden="true">/</span>
+                <a href="../news.html" id="bc-news">最新消息</a>
+                <span class="s4n-article-breadcrumb-sep" aria-hidden="true">/</span>
+                <span aria-current="page">使用 Cloudflare R2 + PicGo 建立免費圖床</span>
+            </nav>
+
+            <div class="s4n-article-hero-meta" id="article-meta">
+                <span class="s4n-article-cat-tag" id="article-cat">技術分享</span>
+                <span class="s4n-article-date" id="article-date">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    2026 年 7 月 21 日
+                </span>
+            </div>
+
+            <h1 class="s4n-article-hero-title" id="article-title">
+                使用 Cloudflare R2 + PicGo 建立免費圖床
+            </h1>
+
+            <div class="s4n-article-hero-author" id="article-author">
+                <img src="https://img.uwub.tw/bafkreihvciizougvtv62mdo3qgdpns3is7l3yuhtyetq4fu3cuzlg3fs4a.jpg" alt="鮭鮭"
+                    class="s4n-article-author-avatar" />
+                <div>
+                    <div class="s4n-article-author-name">鮭鮭</div>
+                    <div class="s4n-article-author-role">Salmon4neko Studio</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ======== 文章主體 ======== -->
+    <section class="s4n-section" id="article-main">
+        <div class="s4n-container">
+
+            <!-- 封面圖 -->
+            <img src="https://img.uwub.tw/%E4%BD%BF%E7%94%A8%20Cloudflare%20R2%20%2B%20PicGo%20%E5%BB%BA%E7%AB%8B%E5%85%8D%E8%B2%BB%E5%9C%96%E5%BA%8A.png"
+                alt="Cloudflare R2 物件儲存主頁面" class="s4n-article-cover" id="article-cover" />
+
+            <div class="s4n-article-layout" id="article-layout">
+
+                <!-- 文章內容 -->
+                <article class="s4n-article-body" id="article-body">
+                    <div class="s4n-article-content" id="article-content">
+
+                        <!-- 引言 -->
+                        <div class="s4n-article-pullquote" id="pullquote-1">
+                            <blockquote>
+                                <p>你不一定相信免費圖床，但你一定會相信Cloudflare</p>
+                                <cite>Cloudflare永遠的神</cite>
+                            </blockquote>
+                        </div>
+
+                        <!-- 前言 -->
+                        <h2 id="section-intro">前言</h2>
+
+                        <p>
+                            這篇文章主要是為了工作室旗下項目
+                            <strong><a href="https://github.com/Salmon4neko-Studio/S4N-Donate-System" target="_blank"
+                                    rel="noopener">S4N Donate System</a></strong>
+                            所撰寫的教學文章，這個項目主要就是一個開源的自建實況主斗內系統，在系統中有很多可以客製的部分，包含很多的圖片部分，因此與其在項目中加入上傳系統我更傾向設定圖片連結來達到效果。
+                        </p>
+
+                        <p>
+                            很多服務如老牌 <a href="https://imgur.com/" target="_blank" rel="noopener">Imgur</a>
+                            或是新興的 <a href="https://meee.com.tw/" target="_blank" rel="noopener">Meee</a>
+                            圖床，都是一個相對快速又便利的圖床選擇，但實際這些服務能否長久的正常營運依舊是一個大哉問，
+                            因此建立一個可靠的自有圖床是有一定的必要性，<s>而且你都自架實況主斗內系統了</s>。
+                        </p>
+
+                        <!-- 說明 -->
+                        <h2 id="section-intro2">說明</h2>
+
+                        <p>
+                            這個免費圖床解決方案主要透過 Cloudflare R2 進行實現，並透過 PicGO GUI 進行快速上傳及管理，
+                            後續建制教學會有詳細的設定說明。
+                        </p>
+
+                        <p>
+                            這個解決方案除了完全免費（Cloudflare 一般額度很難使用完，且 egress 免費），
+                            也仰賴於 Cloudflare 的全球邊緣節點，能夠快速的在世界各地快速訪問，且完全支援需要 S3 的相關服務。
+                        </p>
+
+                        <!-- 教學 -->
+                        <h2 id="section-tutorial">教學</h2>
+
+                        <h4 id="section-r2">Cloudflare R2 建立</h4>
+
+                        <p>
+                            首先進到 <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>
+                            並在左側選單找到 R2物件儲存，點擊概觀進入頁面。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf1.png" alt="Cloudflare 控制台 — R2 物件儲存頁面" loading="lazy" />
+                        </div>
+
+                        <p>在 R2物件儲存 頁面點擊右上角藍色的 <strong>建立貯體</strong> 按鈕。</p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf2.png" alt="R2 物件儲存 — 建立貯體按鈕" loading="lazy" />
+                        </div>
+
+                        <p>
+                            在這個介面給你的儲存空間一個你喜歡的名稱，地點的部分除非你的地點在歐盟區域否則選擇
+                            <strong>自治</strong> 即可，並選擇靠你較近或是圖床容易被使用到的地區。預設儲存類別則可以選擇
+                            <strong>標準</strong>，不頻繁訪問並不支援免費方案。完成後直接 <strong>建立貯體</strong> 即可。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf3.png" alt="建立貯體設定頁面" loading="lazy" />
+                        </div>
+
+                        <p>
+                            建立好後點擊設定標籤頁，這邊請牢記並好好保存您的 S3 API。到這邊為止已經創立好了我們的儲存池，
+                            邏輯上已經可以手動上傳圖片當作圖床了，但我們這邊使用 PicGo GUI 作為介面，讓我們可以更方便的操作。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf4.png" alt="貯體設定頁面 — S3 API 資訊" loading="lazy" />
+                        </div>
+
+                        <p>
+                            這邊很建議使用 <strong>自訂網域</strong> 來讓 R2 內容公開存取，而不是 <strong>公用開發 URL</strong>，
+                            公用開發 URL 允許任何人透過 r2.dev URL 檢視貯體內容。此 URL 有限速，不建議用於生產。
+                            無法使用 Access 和 Caching 等 Cloudflare 功能。
+                        </p>
+
+                        <p>此後的該貯體的存取網址就會是 <code
+                                style="background:var(--s4n-bg-alt);padding:0.15em 0.45em;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.9em;">yourdomain.xx/xxxxx.png</code>。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf5.png" alt="R2 自訂網域設定" loading="lazy" />
+                        </div>
+
+                        <p>
+                            最後一步，回到 R2 物件儲存頁面，找到右下角 <strong>Account Details</strong>
+                            並點擊 API Tokens 右方的 <strong>Manage</strong> 按鈕。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf14.png" alt="Account Details — API Tokens 管理"
+                                loading="lazy" />
+                        </div>
+
+                        <p>點擊藍色 <strong>建立 Account API 權杖</strong> 按鈕。</p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf15.png" alt="建立 Account API 權杖頁面" loading="lazy" />
+                        </div>
+
+                        <p>
+                            給予權杖一個好辨識的名稱後，權限建議給予 <strong>物件讀取和寫入</strong> 而不要給予更高的權限，
+                            同樣的在 <strong>指定貯體</strong> 選擇 <strong>僅套用至特定貯體</strong> 並選擇剛剛創立的
+                            <strong>貯體</strong>，其他不用更改，最後點選藍色 <strong>建立 Account API 權杖</strong> 按鈕。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf16.png" alt="API 權杖設定 — 權限與貯體選擇" loading="lazy" />
+                        </div>
+
+                        <p>下一頁所提供的所有資訊請妥善保存，這些資訊在離開後不會顯示第二次且無法更改，後續請填寫至 PicGo 設定中。</p>
+
+                        <p><strong>此圖片之內容為展示數據</strong></p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf17.png" alt="API 權杖建立完成頁面（展示數據）" loading="lazy" />
+                        </div>
+
+                        <h4 id="section-picgo">PicGo 設定</h4>
+
+                        <p>
+                            前往 <a href="https://github.com/Molunerfinn/picgo?tab=readme-ov-file#download--install"
+                                target="_blank" rel="noopener">PicGo GitHub 頁面</a>
+                            下載客戶端檔案並進行安裝。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf6.png" alt="PicGo GitHub Release 下載頁面" loading="lazy" />
+                        </div>
+
+                        <p>
+                            開啟客戶端程式後進入插件設定，並搜尋 S3 下載
+                            <a href="https://github.com/wayjam/picgo-plugin-s3" target="_blank" rel="noopener">此插件</a>。
+                        </p>
+
+                        <p>
+                            官方原始 <a href="https://github.com/PicGo/Awesome-PicGo" target="_blank"
+                                rel="noopener">插件列表</a>
+                            中確實有專門支援 Cloudflare R2 的插件，但大多年久失修或已封存不再更新，
+                            因此建議使用這個 S3 插件。
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf7.png" alt="PicGo 插件設定 — 搜尋 S3 插件" loading="lazy" />
+                        </div>
+
+                        <p>下載完成後進入圖床設定，點擊加號新增設定。</p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf8.png" alt="PicGo 圖床設定 — 新增設定" loading="lazy" />
+                        </div>
+
+                        <p>
+                            Cloudflare R2 設定可參考作者提供的
+                            <a href="https://github.com/wayjam/picgo-plugin-s3/issues/28" target="_blank"
+                                rel="noopener">配置說明</a>
+                            進行配置，其他設定詳細說明及保留字請參考
+                            <a href="https://github.com/wayjam/picgo-plugin-s3?tab=readme-ov-file#%E9%85%8D%E7%BD%AE-configuration"
+                                target="_blank" rel="noopener">項目說明</a>。
+                        </p>
+
+                        <p>
+                            FYI：若有在 Cloudflare R2 設定自訂網址，需要在 <strong>自定義輸出 URL 模板</strong> 選項進行配置，
+                            例如 <code
+                                style="background:var(--s4n-bg-alt);padding:0.15em 0.45em;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:0.9em;">{protocol}://yourdomain.xx/{uploadedFileName}</code>
+                        </p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf9.png" alt="PicGo S3 插件設定畫面" loading="lazy" />
+                        </div>
+
+                        <p>配置好設定前往 <strong>上傳區</strong> 上傳圖片後就可以在相簿複製連結或是需要的格式進行使用。</p>
+
+                        <div class="s4n-article-img-wrap">
+                            <img src="https://img.uwub.tw/cf18.png" alt="PicGo 上傳區與相簿功能" loading="lazy" />
+                        </div>
+
+                        <p>以上，大功告成。</p>
+
+                        <!-- 結語 -->
+                        <h2 id="section-conclusion">結語</h2>
+
+                        <p>
+                            Cloudflare R2 絕對不只作為圖床這樣簡單而已，然而其穩定性及泛用性非常適合用來作為圖床，
+                            相信你看完教學也已經配置好你的圖床了，
+                            <s>下一步就是部署你的專屬 <a href="https://github.com/Salmon4neko-Studio/S4N-Donate-System"
+                                    target="_blank" rel="noopener">實況主斗內系統</a></s>。
+                        </p>
+
+                    </div>
+
+                    <!-- 文章底部 -->
+                    <div class="s4n-article-footer" id="article-footer">
+                        <div class="s4n-article-tags" id="article-tags" aria-label="文章標籤">
+                            <span class="s4n-article-tag">#Cloudflare</span>
+                            <span class="s4n-article-tag">#R2</span>
+                            <span class="s4n-article-tag">#PicGo</span>
+                            <span class="s4n-article-tag">#圖床</span>
+                            <span class="s4n-article-tag">#S3</span>
+                            <span class="s4n-article-tag">#免費方案</span>
+                        </div>
+                        <div class="s4n-article-nav" id="article-nav">
+                            <a href="../news.html" class="s4n-btn s4n-btn-ghost" id="back-to-news">← 回到最新消息</a>
+                        </div>
+                    </div>
+
+                </article>
+
+                <!-- 側欄 -->
+                <aside class="s4n-article-sidebar" id="article-sidebar" aria-label="文章側欄">
+
+                    <!-- 目錄 -->
+                    <div class="s4n-sidebar-card" id="sidebar-toc">
+                        <div class="s4n-sidebar-title">目錄</div>
+                        <ul class="s4n-toc-list" role="list">
+                            <li><a href="#section-intro">前言</a></li>
+                            <li><a href="#section-intro2">說明</a></li>
+                            <li><a href="#section-tutorial">教學</a></li>
+                            <li><a href="#section-r2" class="toc-sub">Cloudflare R2 建立</a></li>
+                            <li><a href="#section-picgo" class="toc-sub">PicGo 設定</a></li>
+                            <li><a href="#section-conclusion">結語</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- 關於作者 -->
+                    <div class="s4n-sidebar-card" id="sidebar-author">
+                        <div class="s4n-sidebar-title">關於作者</div>
+                        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
+                            <img src="https://img.uwub.tw/bafkreihvciizougvtv62mdo3qgdpns3is7l3yuhtyetq4fu3cuzlg3fs4a.jpg"
+                                alt="鮭鮭"
+                                style="width:44px;height:44px;border-radius:50%;background:var(--s4n-salmon-pale);border:2px solid rgba(255,99,16,0.2);object-fit:cover;flex-shrink:0;" />
+                            <div>
+                                <div style="font-weight:700;color:var(--s4n-text);font-size:0.9375rem;">鮭鮭</div>
+                                <div style="font-size:0.8rem;color:var(--s4n-text-light);">Salmon4neko Studio</div>
+                            </div>
+                        </div>
+                        <p style="font-size:0.8375rem;color:var(--s4n-text-2);line-height:1.7;margin:0;">
+                            鮭貓工作室創辦人，專注於二次元文化周邊與開源系統開發。
+                        </p>
+                    </div>
+
+                    <!-- 相關連結 -->
+                    <div class="s4n-sidebar-card" id="sidebar-links">
+                        <div class="s4n-sidebar-title">相關連結</div>
+                        <ul class="s4n-toc-list" role="list">
+                            <li><a href="https://github.com/Salmon4neko-Studio/S4N-Donate-System" target="_blank"
+                                    rel="noopener">S4N Donate System</a></li>
+                            <li><a href="https://dash.cloudflare.com/" target="_blank" rel="noopener">Cloudflare 控制台</a>
+                            </li>
+                            <li><a href="https://github.com/Molunerfinn/picgo" target="_blank" rel="noopener">PicGo
+                                    GitHub</a></li>
+                            <li><a href="https://github.com/wayjam/picgo-plugin-s3" target="_blank"
+                                    rel="noopener">picgo-plugin-s3</a></li>
+                        </ul>
+                    </div>
+
+                </aside>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ======== 頁尾 ======== -->
+    <footer class="s4n-footer" id="page-footer">
+        <div class="s4n-container">
+            <div class="s4n-footer-inner">
+                <div class="s4n-footer-brand" id="footer-brand">
+                    <img src="https://img.uwub.tw/Salmon4neko%20Studio_%E6%A8%99%E6%BA%96%E5%AD%97.png"
+                        alt="Salmon4neko Studio 鮭貓工作室" class="s4n-footer-logo" />
+                </div>
+                <nav class="s4n-footer-nav" id="footer-nav" aria-label="頁尾導覽">
+                    <a href="../index.html" id="footer-home">首頁</a>
+                    <a href="../services.html" id="footer-services">服務</a>
+                    <a href="../index.html#about" id="footer-about">關於我們</a>
+                    <a href="../index.html#partners" id="footer-partners">夥伴組織</a>
+                    <a href="../news.html" id="footer-news">最新消息</a>
+                    <a href="../contact.html" id="footer-contact">聯絡我們</a>
+                </nav>
+                <div class="s4n-footer-copy" id="footer-copy">
+                    © 2026 Salmon4neko Studio 鮭貓工作室 · <a href="https://sake-corp.com/" target="_blank" rel="noopener"
+                        style="color:inherit; text-decoration:underline; text-underline-offset:3px; opacity:0.75; transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.75'">石桂商社</a>旗下組織
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var s = document.createElement('script');
+            s.src = '../script.js?v=' + Date.now();
+            document.body.appendChild(s);
+        })();
+    </script>
+
+    <script>
+        // 目錄高亮
+        (function () {
+            var headings = document.querySelectorAll('.s4n-article-content h2, .s4n-article-content h4');
+            var tocLinks = document.querySelectorAll('.s4n-toc-list a');
+
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        var id = entry.target.id;
+                        tocLinks.forEach(function (link) {
+                            link.style.color = '';
+                            link.style.background = '';
+                            link.style.fontWeight = '';
+                            if (link.getAttribute('href') === '#' + id) {
+                                link.style.color = 'var(--s4n-salmon)';
+                                link.style.background = 'var(--s4n-salmon-pale)';
+                                link.style.fontWeight = '600';
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-64px 0px -70% 0px', threshold: 0 });
+
+            headings.forEach(function (h) { if (h.id) observer.observe(h); });
+        })();
+    </script>
+
+</body>
+
+</html>
