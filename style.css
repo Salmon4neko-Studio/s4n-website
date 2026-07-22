@@ -685,13 +685,32 @@ a { color: inherit; text-decoration: none; }
    頁面 Hero（服務頁）
    ============================================= */
 .s4n-page-hero {
-    padding: 7rem 0 4rem;
+    position: relative;
+    padding: 7rem 0 5rem;
     margin-top: 64px;
-    background: linear-gradient(135deg, var(--s4n-salmon-pale) 0%, var(--s4n-bg) 100%);
-    border-bottom: 1px solid var(--s4n-border);
+    background: linear-gradient(135deg, var(--s4n-salmon) 0%, var(--s4n-salmon-lt) 60%, #ff9f6b 100%);
+    overflow: hidden;
 }
 
-.s4n-page-hero-inner { text-align: center; }
+.s4n-page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 70% at 80% 20%, rgba(255,255,255,0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 50% at 10% 90%, rgba(0,0,0,0.08) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.s4n-page-hero-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.s4n-page-hero .s4n-section-label {
+    color: rgba(255,255,255,0.75);
+}
 
 .s4n-page-hero-title {
     font-size: clamp(2.25rem, 5vw, 3.5rem);
@@ -701,10 +720,19 @@ a { color: inherit; text-decoration: none; }
     margin-bottom: 1rem;
 }
 
+.s4n-page-hero .s4n-page-hero-title {
+    color: #fff;
+    line-height: 1.1;
+}
+
 .s4n-page-hero-desc {
     font-size: 1.0625rem;
     color: var(--s4n-text-2);
     line-height: 1.8;
+}
+
+.s4n-page-hero .s4n-page-hero-desc {
+    color: rgba(255,255,255,0.85);
 }
 
 /* =============================================
