@@ -957,7 +957,14 @@ a { color: inherit; text-decoration: none; }
     .s4n-service-reverse {
         grid-template-areas: unset;
     }
-    .s4n-service-reverse .s4n-service-detail-visual { order: -1; }
+    .s4n-service-reverse .s4n-service-detail-visual {
+        grid-area: auto;
+        order: 1;
+    }
+    .s4n-service-reverse .s4n-service-detail-content {
+        grid-area: auto;
+        order: 0;
+    }
 
     .ts-grid.is-3-columns {
         grid-template-columns: 1fr 1fr !important;
